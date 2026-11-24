@@ -73,6 +73,8 @@ export interface VoiceConfig {
 
   /** Recorder binary: "auto", "pw-record", "parecord", "arecord", "ffmpeg" or "sox". */
   recorder: string
+  /** Optional exact Windows DirectShow microphone name. */
+  recorderDevice?: string
   /** Capture sample rate. 16000 is plenty for speech. */
   sampleRate: number
   /** Auto-stop after this many seconds (0 disables). */
@@ -251,8 +253,8 @@ export function resolveConfig(raw: Record<string, unknown> | undefined): VoiceCo
 
     confirm: asBool(o.confirm, false),
     delivery,
-    prefix: firstDefined(asString(o.prefix, undefined), "") as string,
-    suffix: firstDefined(asString(o.suffix, undefined), "") as string,
+    prefix: asString(o.prefix, "") ?? "",
+    suffix: asString(o.suffix, "") ?? "",
 
     polish: asBool(o.polish, false),
     polishPrompt: firstDefined(
@@ -261,6 +263,7 @@ export function resolveConfig(raw: Record<string, unknown> | undefined): VoiceCo
     ) as string,
 
     recorder: firstDefined(asString(o.recorder, undefined), "auto") as string,
+    recorderDevice: firstDefined(asString(o.recorderDevice, undefined), env("OPENCODE_VOICE_DEVICE")),
     sampleRate: Math.max(8000, asNum(o.sampleRate, 16000)),
     maxDuration: Math.max(0, asNum(o.maxDuration, 120)),
     minDuration: Math.max(0, asNum(o.minDuration, 0.35)),

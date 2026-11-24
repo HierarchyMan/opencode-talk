@@ -38,11 +38,12 @@
   "devDependencies": {
     "@opencode/client": "2.0.24",
     "@opencode/plugin": "2.0.24",
+    "@opentui/solid": "0.9.4",
+    "@types/express": "^4.17.21",
     "@types/node": "^24.0.0",
     "solid-js": "^1.9.16",
     "tsx": "^4.19.0",
     "typescript": "^5.8.0",
-    "@types/express": "^4.17.21",
     "vitest": "^3.0.0"
   },
   "dependencies": {

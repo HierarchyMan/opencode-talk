@@ -28,6 +28,7 @@ function check(label: string, condition: boolean, detail?: unknown) {
 const layers: any[] = []
 const context: any = {
   options: { keybind: "<leader>v" },
+  storage: { store: (_key: string, options: any) => [options.initial, async (mutate: any) => mutate(options.initial)] },
   ui: {
     toast: { show: () => {} },
     router: { current: () => ({ type: "session", sessionID: "ses_smoke" }) },
@@ -51,7 +52,7 @@ context.ui.dialog.alert = async (options: any) => {
   alerts.push(String(options?.message ?? ""))
 }
 layers[0]?.commands?.[0]?.run("help")
-layers[0]?.commands?.[2]?.run("help")
+layers[0]?.commands?.find((command: any) => command.id === "voice.sound.toggle")?.run("help")
 await new Promise((resolve) => setTimeout(resolve, 0))
 check("mic help shows usage", alerts.some((message) => message.includes("/mic send")), alerts)
 check("sound help shows usage", alerts.some((message) => message.includes("/sound pause")), alerts)
@@ -86,6 +87,7 @@ check("detect language fr", detectLanguage("Bonjour, ceci est un test en frança
 // 4. Transcription against a mock OpenAI-compatible endpoint.
 let auth = ""
 let model = ""
+let language = ""
 let multipartBytes = 0
 const server = createServer((req, res) => {
   auth = String(req.headers.authorization ?? "")
@@ -95,6 +97,7 @@ const server = createServer((req, res) => {
     const body = Buffer.concat(chunks).toString("latin1")
     multipartBytes = body.length
     model = /name="model"\r\n\r\n([^\r]+)/.exec(body)?.[1] ?? ""
+    language = /name="language"\r\n\r\n([^\r]+)/.exec(body)?.[1] ?? ""
     res.setHeader("content-type", "application/json")
     res.end(JSON.stringify({ text: "hello from mock stt" }))
   })
@@ -106,17 +109,20 @@ const dir = await mkdtemp(join(tmpdir(), "opencode-voice-smoke-"))
 const wav = join(dir, "audio.wav")
 await writeFile(wav, Buffer.alloc(2048, 1))
 
-const apiCfg = resolveConfig({ backend: "api", baseURL: `http://127.0.0.1:${port}/v1`, apiKey: "sk-test" })
+const apiCfg = resolveConfig({ backend: "api", baseURL: `http://127.0.0.1:${port}/v1`, apiKey: "sk-test", language: "en" })
 const text = await transcribe(apiCfg, wav)
 check("api transcript", text === "hello from mock stt", text)
 check("bearer auth forwarded", auth === "Bearer sk-test", auth)
 check("model field sent", model === "gpt-4o-mini-transcribe", model)
+check("language field sent", language === "en", language)
 check("audio uploaded", multipartBytes >= 2048, multipartBytes)
 
 // 5. Local backend.
 const localCfg = resolveConfig({
   backend: "local",
-  localCommand: "cat {audio} >/dev/null; echo local transcript",
+  localCommand: process.platform === "win32"
+    ? "echo local transcript"
+    : "cat {audio} >/dev/null; echo local transcript",
 })
 check("local transcript", (await transcribe(localCfg, wav)) === "local transcript")
 

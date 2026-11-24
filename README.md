@@ -1,5 +1,10 @@
 # opencode-talk
 
+> **Fork notice:** This fork of [hdlopesrocha/opencode-talk](https://github.com/hdlopesrocha/opencode-talk)
+> experiments with inline composer dictation (`/voice `, blinking red footer indicator,
+> Space/Enter to stop, Escape to cancel, and persistent `/voice-toggle`) and Windows
+> FFmpeg DirectShow microphone support. See [LOCAL-CHANGES.md](LOCAL-CHANGES.md) for details.
+
 **Voice + remote control for [OpenCode](https://opencode.ai): talk to the agent
 and let it talk back, and drive the same sessions from Telegram or any Nostr
 client — including a Telegram group where every session gets its own topic.**

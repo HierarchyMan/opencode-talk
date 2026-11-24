@@ -73,7 +73,7 @@ export default Plugin.define({
       stopSpeaking() // silence any ongoing TTS before recording
       starting = true
       try {
-        recording = await startRecording({ recorder: cfg.recorder, sampleRate: cfg.sampleRate })
+        recording = await startRecording({ recorder: cfg.recorder, sampleRate: cfg.sampleRate, device: cfg.recorderDevice })
         target = { sessionID, prompt, delivery }
         if (cfg.maxDuration > 0) {
           timer = setTimeout(() => void finish().catch(() => {}), cfg.maxDuration * 1000)
